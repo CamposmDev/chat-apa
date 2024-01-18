@@ -1,6 +1,8 @@
 import db from "../../database/index.js"
 import bcrypt from "bcrypt"
+import JWTAuth from "../middleware/JWTAuth.js";
 
+const auth = new JWTAuth()
 
 export default class UserController {
     async loginUser(req, res) {
@@ -26,7 +28,33 @@ export default class UserController {
         const password = req.body.password;
         /* verify password */
         let match = await bcrypt.compare(password, user.password);
-        return res.status(400).json({ message: 'WIP' })
+        if (match) {
+            let userId = user._id.toString()
+            let token = auth.signJWT(userId)
+            return res.status(200).cookie("token", token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "Strict",
+                expires: new Date(Date.now() + (1000 * 60 * 60 * 24)) /* expires in 24 hours */
+            }).json({ 
+                message: "User successfully logged in!",
+                user: {
+                    id: userId,
+                    name: user.name,
+                    username: user.username,
+                    email: user.email
+                }
+            })
+        }   
+        return res.status(400).json({ message: 'Incorrect password!' })
+    }
+
+    async logoutUser(req, res) {
+        if (!req.userId) {
+            return res.status(401).send({message: "Unauthorized"})
+        } else {
+            res.status(200).clearCookie("token").json({message: "User successfully logged out!"})
+        }
     }
 
     async createUser(req, res) {

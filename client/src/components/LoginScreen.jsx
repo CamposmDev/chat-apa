@@ -11,6 +11,10 @@ import Box from '@mui/material/Box';
 import LockIcon from '@mui/icons-material/Lock';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import { useContext } from 'react';
+import { AuthContext } from 'src/context/auth';
+import { useEffect } from 'react';
+// import { useNavigate } from 'react-router-dom';
 
 function Copyright(props) {
     return (
@@ -26,15 +30,24 @@ function Copyright(props) {
 }
 
 const LoginScreen = () => {
+    const auth = useContext(AuthContext)
+    // const nav = useNavigate()
+    useEffect(() => {
+        console.log(auth)
+        if (auth.user) {
+            // nav('/')
+        }
+    }, [auth])
+
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        const email = data.get('email')
+        const credential = data.get('credential')
         const password = data.get('password')
-        console.log({
-            email: email,
+        auth.loginUser({
+            credential: credential,
             password: password
-        });
+        })
     };
 
     return (
@@ -59,10 +72,10 @@ const LoginScreen = () => {
                         margin="normal"
                         required
                         fullWidth
-                        id="email"
-                        label="Email Address"
-                        name="email"
-                        autoComplete="email"
+                        id="credential"
+                        label="Email/Username"
+                        name="credential"
+                        autoComplete="credential"
                         autoFocus
                     />
                     <TextField
@@ -74,6 +87,7 @@ const LoginScreen = () => {
                         type="password"
                         id="password"
                         autoComplete="current-password"
+                        
                     />
                     <FormControlLabel
                         control={<Checkbox value="remember" color="primary" />}
