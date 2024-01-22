@@ -12,9 +12,9 @@ import LockIcon from '@mui/icons-material/Lock';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { useContext } from 'react';
-import { AuthContext } from 'src/context/auth';
+import { AuthContext } from '../context/auth';
 import { useEffect } from 'react';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function Copyright(props) {
     return (
@@ -31,12 +31,13 @@ function Copyright(props) {
 
 const LoginScreen = () => {
     const auth = useContext(AuthContext)
-    // const nav = useNavigate()
+    const nav = useNavigate()
+
     useEffect(() => {
-        console.log(auth)
-        if (auth.user) {
-            // nav('/')
+        if (auth.loggedIn) {
+            nav('/')
         }
+        // eslint-disable-next-line
     }, [auth])
 
     const handleSubmit = (event) => {
@@ -44,6 +45,7 @@ const LoginScreen = () => {
         const data = new FormData(event.currentTarget);
         const credential = data.get('credential')
         const password = data.get('password')
+
         auth.loginUser({
             credential: credential,
             password: password

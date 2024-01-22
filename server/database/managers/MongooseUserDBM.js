@@ -26,9 +26,32 @@ export default class MongooseUserDBM {
             name: arg.name,
             email: arg.email,
             username: arg.username,
-            password: arg.password
+            password: arg.password,
+            friends: []
         })
         if (!user) return null;
         return user;
+    }
+
+    async addFriend(userId, friendId) {
+        let user = await UserModel.findOne({_id: userId})
+        if (!user) return null;
+        user.friends.push(friendId);
+        user.save();
+        return user;
+    }
+
+    async removeFriend(userId, friendId) {
+        let user = await UserModel.findOne({_id: userId})
+        if (!user) return null;
+        user.friends.filter(s => s != friendId)
+        user.save();
+        return user;
+    }
+
+    async getFriends(userId) {
+        let user = await UserModel.findOne({_id: userId})
+        if (!user) return null;
+        return user.friends;
     }
 }

@@ -11,6 +11,10 @@ import Box from '@mui/material/Box';
 import Lock from '@mui/icons-material/Lock';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import { useContext } from 'react';
+import { AuthContext } from '../context/auth';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 function Copyright(props) {
     return (
@@ -26,6 +30,16 @@ function Copyright(props) {
 }
 
 const RegisterScreen = () => {
+    const auth = useContext(AuthContext)
+    const nav = useNavigate()
+
+    useEffect(() => {
+        if (auth.loggedIn) {
+            nav('/')
+        }
+        // eslint-disable-next-line
+    }, [auth])
+
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -41,7 +55,7 @@ const RegisterScreen = () => {
             email: email,
             password: password
         }
-        console.log(user);
+        auth.registerUser(user)
     };
 
     return (

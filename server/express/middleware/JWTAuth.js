@@ -27,6 +27,10 @@ export default class JWTAuth {
         }
     }
 
+    verify(token, onComplete) {
+        jwt.verify(token, JWT_SECRET, {}, onComplete)
+    }
+
     signJWT(arg, exp) {
         if (exp) {
             return jwt.sign({

@@ -34,16 +34,17 @@ export default class UserController {
             return res.status(200).cookie("token", token, {
                 httpOnly: true,
                 secure: true,
-                sameSite: "Strict",
+                sameSite: "none",
                 expires: new Date(Date.now() + (1000 * 60 * 60 * 24)) /* expires in 24 hours */
             }).json({ 
                 message: "User successfully logged in!",
-                user: {
-                    id: userId,
-                    name: user.name,
-                    username: user.username,
-                    email: user.email
-                }
+                userId: userId
+                // user: {
+                //     id: userId,
+                //     name: user.name,
+                //     username: user.username,
+                //     email: user.email
+                // }
             })
         }   
         return res.status(400).json({ message: 'Incorrect password!' })
@@ -102,6 +103,9 @@ export default class UserController {
         if (!user) {
             return res.status(500).json({ message: "Internal Server Error" })
         }
-        return res.status(201).json({ message: "User created successfully!", user: user })
+        return res.status(201).json({ 
+            message: "User created successfully!", 
+            userId: user._id.toString()
+         })
     }
 }

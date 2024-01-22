@@ -2,6 +2,8 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser";
 import dotenv from 'dotenv'
+import { WebSocketServer } from "ws";
+import { parseToken, refreshOnlineClients, initConnectionTimer, initMessageHandler } from "./express/middleware/Util.js"
 
 dotenv.config();
 const app = express();
@@ -22,9 +24,29 @@ app.get('/', (req, res) => {
 app.use("/api", ApiRouter)
 
 import db from "./database/index.js"
+import JWTAuth from "./express/middleware/JWTAuth.js";
 
 /* initialize server */
-app.listen(process.env.PORT, () => {
+const server = app.listen(process.env.PORT, () => {
     db.connect(process.env.DB_URL);
     console.info('server listening on port ' + process.env.PORT)
 });
+
+const wss = new WebSocketServer({server})
+wss.on('connection', (conn, req) => {
+    const tokenValue = parseToken(req.headers.cookie)
+    if (tokenValue) {
+        const auth = new JWTAuth()
+        auth.verify(tokenValue, (err, data) => {
+            if (err) console.log(err)
+            else {
+                const userId = data;
+                conn.userId = userId;
+            }
+        })
+    }
+
+    initConnectionTimer(conn, wss);
+    initMessageHandler(conn)
+    refreshOnlineClients(wss);
+})

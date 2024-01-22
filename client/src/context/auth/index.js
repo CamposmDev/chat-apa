@@ -1,6 +1,5 @@
-// import { useNavigate } from "react-router-dom";
 import { UserApi } from "../../api/axios";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
 const AuthActionType = {
     LOGIN: 'LOGIN',
@@ -8,33 +7,37 @@ const AuthActionType = {
     LOGOUT: "LOGOUT"
 }
 
-const AuthContext = createContext()
+const AuthContext = createContext({})
 
 const AuthContextProvider = (props) => {
     const [auth, setAuth] = useState({
-        user: null
+        userId: null,
+        loggedIn: false
     })
 
-    // eslint-disable-next-line
-    // const nav = useNavigate()
+    useEffect(() => {
+        console.log(auth)
+    }, [auth])
 
     const authReducer = (action) => {
         const { type, payload } = action
         switch (type) {
             case AuthActionType.LOGIN: {
-                console.log('login user')
                 return setAuth({
-                    user: payload.user
-                });
+                    userId: payload.userId,
+                    loggedIn: true
+                })
             }
             case AuthActionType.REGISTER: {
                 return setAuth({
-                    user: payload.user
+                    userId: payload.userId,
+                    loggedIn: true
                 });
             }
             case AuthActionType.LOGOUT: {
                 return setAuth({
-                    user: null
+                    userId: null,
+                    loggedIn: false
                 });
             }
             default: {
@@ -42,29 +45,40 @@ const AuthContextProvider = (props) => {
             }
         }
     }
-
+    
     auth.loginUser = async function(payload) {
-        const res = await UserApi.loginUser(payload)
-        if (res.status === 200) {
-            // nav('/')
-            authReducer({
-                type: AuthActionType.LOGIN,
-                payload: {
-                    user: res.data.user
-                }
-            })
+        try {
+            const res = await UserApi.loginUser(payload)
+            if (res.status === 200) {
+                authReducer({
+                    type: AuthActionType.LOGIN,
+                    payload: {
+                        userId: res.data.userId
+                    }
+                })
+            }
+        } catch (err) {
+            console.log(err)
+            // if (err.response.status === 400) {
+                // console.log(err.response.message)
+            // }
         }
+        
     }
 
     auth.registerUser = async function(payload) {
-        const res = await UserApi.registerUser(payload)
-        if (res.status === 200) {
-            authReducer({
-                type: AuthActionType.REGISTER,
-                payload: { 
-                    user: res.data.user
-                }
-            })
+        try {
+            const res = await UserApi.registerUser(payload)
+            if (res.status === 200) {
+                authReducer({
+                    type: AuthActionType.REGISTER,
+                    payload: { 
+                        userId: res.data.userId
+                    }
+                })
+            }
+        } catch (err) {
+            console.log(err)
         }
     }
 
