@@ -6,6 +6,23 @@ import { WebSocketServer } from "ws";
 import { parseToken, refreshOnlineClients, initConnectionTimer, initMessageHandler } from "./express/middleware/Util.js"
 
 dotenv.config();
+
+if (!process.env.DB_URL) {
+    console.log("Missing 'DB_URL' field")
+    process.exit(1)
+}
+if (!process.env.ORIGIN) {
+    console.log("Missing 'ORIGIN' field")
+    process.exit(1)
+}
+if (!process.env.PORT) {
+    console.log("Missing 'PORT' field")
+    process.exit(1)
+}
+if (!process.env.JWT_SECRET) {
+    console.log ("Missing 'JWT_SECRET' field")
+}
+
 const app = express();
 app.use(express.urlencoded({ extended: true }))
 app.use(cors({

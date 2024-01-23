@@ -69,7 +69,7 @@ const AuthContextProvider = (props) => {
     auth.registerUser = async function(payload) {
         try {
             const res = await UserApi.registerUser(payload)
-            if (res.status === 200) {
+            if (res.status === 201) {
                 authReducer({
                     type: AuthActionType.REGISTER,
                     payload: { 

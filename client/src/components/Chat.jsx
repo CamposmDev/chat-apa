@@ -2,18 +2,20 @@ import { useEffect, useState } from "react"
 import { Message } from "@mui/icons-material";
 
 import { Box, Stack, Typography, Icon, TextField, Button } from "@mui/material"
+import { WS_URL } from "src/util/Contants";
 
 const Chat = () => {
     const [ws, setWebSocket] = useState(null);
     const [users, setUsers] = useState([])
     useEffect(() => {
-        const ws = new WebSocket("ws://localhost:4000")
+        const ws = new WebSocket(WS_URL)
         setWebSocket(ws)
         ws.addEventListener('message', handleMessage)
     }, [])
 
     const handleMessage = (event) => {
         let arr = JSON.parse(event.data)
+        console.log(arr)
         setUsers(arr);
     }
     return (

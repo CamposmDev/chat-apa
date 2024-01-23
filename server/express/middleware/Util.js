@@ -18,7 +18,13 @@ function parseToken(cookies) {
  * @param {WebSocketServer} wss 
  */
 function refreshOnlineClients(wss) {
-    const onlineIds = [...wss.clients].map(c => c.userId);
+    let onlineIds = [...wss.clients].map(c => c.userId);
+    const set = new Set();
+    onlineIds.forEach(x => set.add(x));
+    onlineIds = [];
+    set.forEach(x => {
+        onlineIds.push(x);
+    });
     [...wss.clients].forEach(client => {
         client.send(JSON.stringify(onlineIds))
     })
