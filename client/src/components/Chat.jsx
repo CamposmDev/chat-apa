@@ -22,11 +22,14 @@ const Chat = () => {
         console.log(arr)
         setUsers(arr);
     }
+    const callback = (userId) => {
+        console.log(`message ${userId}`)
+    }
     let contacts = <></>
     if (users.length > 0) {
         contacts = users.map(x => {
             if (x === auth.userId) return <></>
-            return <ContactCard key={x} userId={x}/>
+            return <ContactCard key={x} userId={x} callback={callback}/>
         })
     }
     return (

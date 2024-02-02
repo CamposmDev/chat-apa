@@ -14,7 +14,7 @@ const ContactCard = (props) => {
         fetchUsername();
     }, [])
     return (
-        <Card>
+        <Card onClick={props.callback}>
             <Stack flexDirection={"row"} alignItems={'center'} gap={1} margin={1}>
             <Avatar/>
             <Typography marginRight={1}>{username}</Typography>
