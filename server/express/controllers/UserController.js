@@ -108,4 +108,19 @@ export default class UserController {
             userId: user._id.toString()
          })
     }
+
+    async getUsername(req, res) {
+        if (!req || !req.body) {
+            return res.status(400).json({ message: 'Bad Request!' });
+        }
+        if (!req.params.userId) {
+            return res.status(400).json({ message: 'User ID missing!' });
+        }
+        const userId = req.params.userId;
+        let username = await db.users.getUsernameById(userId);
+        if (!userId) {
+            return res.status(400).json({message: `Failed to find user with id '${userId}'`})
+        }
+        return res.status(200).json({username: username})
+    }
 }

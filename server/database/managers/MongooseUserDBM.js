@@ -33,6 +33,12 @@ export default class MongooseUserDBM {
         return user;
     }
 
+    async getUsernameById(userId) {
+        let user = await UserModel.findOne({_id: userId});
+        if (!user) return null;
+        return user.username;
+    }
+
     async addFriend(userId, friendId) {
         let user = await UserModel.findOne({_id: userId})
         if (!user) return null;

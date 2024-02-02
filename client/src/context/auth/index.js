@@ -91,6 +91,17 @@ const AuthContextProvider = (props) => {
         }
     }
 
+    auth.getUsername = async function(userId) {
+        try {
+            const res = await UserApi.getUsername(userId);
+            if (res.status === 200) {
+                return res.data.username;
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     return (
         <AuthContext.Provider value={auth}>
             {props.children}

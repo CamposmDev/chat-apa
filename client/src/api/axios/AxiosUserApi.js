@@ -12,5 +12,9 @@ export default class AxiosUserApi {
     async logoutUser() {
         return AxiosApi.post('/user/logout')
     }
+
+    async getUsername(userId) {
+        return AxiosApi.get(`/user/username/${userId}`)
+    }
 }
 
