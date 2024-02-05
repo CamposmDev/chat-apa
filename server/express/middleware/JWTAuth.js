@@ -27,8 +27,19 @@ export default class JWTAuth {
         }
     }
 
-    verify(token, onComplete) {
-        jwt.verify(token, JWT_SECRET, {}, onComplete)
+    /**
+     * Parses token value
+     * @param {string} token 
+     * @returns 
+     */
+    async parseToken(token) {
+        return new Promise((resolve, reject) => {
+            jwt.verify(token, JWT_SECRET, {}, (err, data) => {
+                if (err) throw err;
+                resolve(data);
+            })
+            reject('no token')
+        });
     }
 
     signJWT(arg, exp) {

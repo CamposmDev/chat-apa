@@ -1,12 +1,15 @@
 
 import mongoose from "mongoose";
 import { MongooseUserDBM } from "./managers/index.js"
+import MongooseMessageDBM from "./managers/MongooseMessageDBM.js";
 
 class MongooseDB {
     #users;
+    #messages;
 
     constructor() {
         this.#users = new MongooseUserDBM();
+        this.#messages = new MongooseMessageDBM();
     }
 
     async connect(uri, options) {
@@ -22,6 +25,8 @@ class MongooseDB {
     }
 
     get users() { return this.#users }
+
+    get messages() { return this.#messages }
 }
 
 export {
