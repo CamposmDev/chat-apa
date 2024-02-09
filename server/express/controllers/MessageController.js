@@ -1,6 +1,7 @@
 import db from "../../database/index.js";
 import JWTAuth from "../middleware/JWTAuth.js";
 
+
 export default class MessageController {
     async messages(req, res) {
         const { userId } = req.params;

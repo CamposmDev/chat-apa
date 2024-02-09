@@ -11,5 +11,6 @@ UserRouter.post('/register', controller.createUser);
 UserRouter.post('/login', controller.loginUser)
 UserRouter.post('/logout', auth.verifyJWT, controller.logoutUser)
 UserRouter.get('/username/:userId', auth.verifyJWT, controller.getUsername);
+UserRouter.get("/", controller.getUsers)
 
 export default UserRouter;

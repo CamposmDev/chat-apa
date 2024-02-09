@@ -91,11 +91,22 @@ const AuthContextProvider = (props) => {
         }
     }
 
-    auth.getUsername = async function(userId) {
+    auth.getUsernameById = async function(userId) {
         try {
-            const res = await UserApi.getUsername(userId);
+            const res = await UserApi.getUsernameById(userId);
             if (res.status === 200) {
                 return res.data.username;
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    auth.getUsers = async function() {
+        try {
+            const res = await UserApi.getUsers();
+            if (res.status === 200) {
+                return res.data.users;
             }
         } catch (err) {
             console.log(err);

@@ -59,7 +59,7 @@ function initConnectionTimer(conn, wss) {
 function initMessageHandler(conn) {
     conn.on('message', async(message) => {
         const messageData  = JSON.parse(message.toString())
-        const {receipient, text, file} = messageData ;
+        const {recipient, text, file} = messageData ;
         let filename = null;
         if (file) {
             console.log('size', file.data.length);

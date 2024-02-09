@@ -35,7 +35,6 @@ export default class UserController {
                 httpOnly: true,
                 secure: true,
                 sameSite: "none",
-                expires: new Date(Date.now() + (1000 * 60 * 60 * 24)) /* expires in 24 hours */
             }).json({ 
                 message: "User successfully logged in!",
                 userId: userId
@@ -103,9 +102,16 @@ export default class UserController {
         if (!user) {
             return res.status(500).json({ message: "Internal Server Error" })
         }
-        return res.status(201).json({ 
+        const userId = user._id.toString();
+        const token = auth.signJWT(userId)
+        return res.status(201).cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            expires: new Date(Date.now() + (1000 * 60 * 60 * 24)) /* expires in 24 hours */
+        }).json({ 
             message: "User created successfully!", 
-            userId: user._id.toString()
+            userId: userId
          })
     }
 
@@ -122,5 +128,13 @@ export default class UserController {
             return res.status(400).json({message: `Failed to find user with id '${userId}'`})
         }
         return res.status(200).json({username: username})
+    }
+
+    async getUsers(req, res) {
+        if (!req || !req.body) {
+            return res.status(400).json({ message: 'Bad Request!' })
+        }
+        let users = await db.users.getUsers();
+        return res.status(200).json({users: users});
     }
 }

@@ -60,4 +60,9 @@ export default class MongooseUserDBM {
         if (!user) return null;
         return user.friends;
     }
+
+    async getUsers() {
+        let users = await UserModel.find({}, {_id: 1, username: 1});
+        return users;
+    }
 }
