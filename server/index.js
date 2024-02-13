@@ -3,7 +3,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser";
 import dotenv from 'dotenv'
 import { WebSocketServer } from "ws";
-import { parseToken, refreshOnlineClients, initConnectionTimer, initMessageHandler } from "./express/middleware/Util.js"
+import { parseCookies, refreshOnlineClients, initConnectionTimer, initMessageHandler } from "./express/middleware/Util.js"
 
 dotenv.config();
 
@@ -51,7 +51,7 @@ const server = app.listen(process.env.PORT, () => {
 
 const wss = new WebSocketServer({server})
 wss.on('connection', (conn, req) => {
-    const tokenValue = parseToken(req.headers.cookie)
+    const tokenValue = parseCookies(req.headers.cookie)
     if (tokenValue) {
         const auth = new JWTAuth()
         auth.verify(tokenValue, (err, data) => {
@@ -64,6 +64,6 @@ wss.on('connection', (conn, req) => {
     }
 
     initConnectionTimer(conn, wss);
-    initMessageHandler(conn)
+    initMessageHandler(conn, wss)
     refreshOnlineClients(wss);
 })

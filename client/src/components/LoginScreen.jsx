@@ -34,19 +34,19 @@ const LoginScreen = () => {
     const nav = useNavigate()
 
     useEffect(() => {
-        if (auth.loggedIn) {
+        if (auth.isLoggedIn) {
             nav('/')
         }
         // eslint-disable-next-line
     }, [auth])
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        const credential = data.get('credential')
-        const password = data.get('password')
+    const handleSubmit = (ev) => {
+        ev.preventDefault();
+        const data = new FormData(ev.currentTarget);
+        const credential = data.get('credential').toString()
+        const password = data.get('password').toString()
 
-        auth.loginUser({
+        auth.login({
             credential: credential,
             password: password
         })

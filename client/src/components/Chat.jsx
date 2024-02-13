@@ -1,30 +1,59 @@
 import { useContext, useEffect, useState } from "react"
-import { Message } from "@mui/icons-material";
-
-import { Box, Stack, Typography, Icon, TextField, Button } from "@mui/material"
-import { WS_URL } from "src/util/Contants";
-import { AuthContext } from "src/context/auth";
-import ContactCard from "./ContactCard";
-import Logo from "./Logo";
+import { Box, Stack, TextField, Button, Typography, List, Card, CardContent } from "@mui/material"
+import { WS_URL } from "../util/Contants";
+import { AuthContext } from "../context/auth";
+import ContactCard from "./user/ContactCard";
+import MessageBox from "./MessageBox";
 
 const Chat = () => {
     const auth = useContext(AuthContext)
     const [ws, setWebSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState({});
-    const [offlineUsers, setOfflineUsers] = useState({});
+    const [offlineUsers, setOfflineUsers] = useState([]);
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [messages, setMessages] = useState([]);
-    const [message, setMessage] = useState("");
-    const [users, setUsers] = useState([])
+
     useEffect(() => {
         initWebSocket()
+        // eslint-disable-next-line
     }, [])
 
+    useEffect(() => {
+        async function fetchOfflineUsers() {
+            if (Object.keys(onlineUsers).length < 0) return;
+            let userIds = await auth.getUsers();
+            if (!userIds) return;
+            // console.log(onlineUsers)
+            userIds = userIds.filter(x => !(x._id in onlineUsers) && !(x._id === auth.userId));
+            // console.log(userIds)
+            setOfflineUsers(userIds)
+        }
+        fetchOfflineUsers();
+        // eslint-disable-next-line
+    }, [onlineUsers])
+
+    useEffect(() => {
+        async function fetchMessages() {
+            const messages = await auth.getMessagesFrom(selectedUserId);
+            setMessages(messages);
+        }
+        if (selectedUserId) fetchMessages();
+        // eslint-disable-next-line
+    }, [selectedUserId])
+
     const initWebSocket = () => {
+        /**
+         * Handles incoming messages from server
+         * @param {MessageEvent} event 
+         */
         const handleMessage = (event) => {
-            let arr = JSON.parse(event.data)
-            console.log(arr)
-            setUsers(arr);
+            const payload = JSON.parse(event.data)
+            if ('online' in payload) {
+                delete payload.online[auth.userId]
+                setOnlineUsers(payload.online);
+            } else if ('messages' in payload) {
+                console.log(payload)
+            }
         }
         const reconnect = () => {
             setTimeout(() => {
@@ -33,24 +62,23 @@ const Chat = () => {
             initWebSocket();
         }
         const ws = new WebSocket(WS_URL)
-        ws.addEventListener('open', () => console.log("Connected to " + WS_URL))
+        ws.addEventListener('open', () => console.log(`Connected to ${WS_URL}`))
         ws.addEventListener('message', handleMessage)
         ws.addEventListener('close', reconnect)
         setWebSocket(ws)
     }
 
-    let contacts = (users.length > 0) ? users.map(x => {
-        if (x === auth.userId) return <div/>
-        return <ContactCard key={x} userId={x} callback={setSelectedUserId} />
-    }) : <div />;
-
-    const sendMessage = (ev, file = null) => {
-        ev.preventDefault()
+    const sendMessage = (message, file = null) => {
         ws.send(JSON.stringify({
             recipient: selectedUserId,
             text: message,
             file,
         }))
+        async function updateMessages() {
+            const messages = await auth.getMessagesFrom(selectedUserId);
+            setMessages(messages);
+        }
+        updateMessages();
         // if (file) {
 
         // } else {
@@ -58,29 +86,55 @@ const Chat = () => {
         // }
     }
 
+    const contactBox = (
+        <List sx={{ mr: 1 }}>
+            {Object.keys(onlineUsers).map(x => <ContactCard key={x}
+                userId={x}
+                callback={setSelectedUserId}
+                isSelected={selectedUserId === x}
+                online
+            />)}
+            {offlineUsers.map(x => <ContactCard key={x._id}
+                userId={x._id}
+                callback={setSelectedUserId}
+                isSelected={selectedUserId === x._id}
+            />)}
+        </List>
+    )
+
     return (
-        <Stack direction={"row"} sx={{ ml: 1 }} spacing={1}>
-            <Stack pr={1}>
-                <Logo />
-                <Stack spacing={1} flexGrow={1}>
-                    {contacts}
-                </Stack>
-                {/* <ContactCard userId={auth.userId}/> */}
-            </Stack>
-            <Box flexGrow={1} flexDirection={'column'} display={'flex'} sx={{ height: '100vh', justifyContent: 'space-between' }}>
-                <Box sx={{ flewGrow: 1, overflowY: 'auto' }}>
-                    hi
-                </Box>
-                <Box component={'form'} onSubmit={sendMessage}>
-                    <Stack direction={'row'} sx={{ padding: 2 }}>
-                        <TextField label={'Message'} name="message" fullWidth size="small" disabled={selectedUserId === null} onChange={(ev) => {
-                            setMessage(ev.target.value);
-                        }} />
-                        <Button type="submit" variant="contained" disabled={selectedUserId === null}>Send</Button>
-                    </Stack>
+        <Box ml={1} gap={1}>
+            <Box flexGrow={1} flexDirection={"column"}>
+                <Box display='flex'>
+                    {contactBox}
+                    <Box flexGrow={1}>
+                        {messages.map(x => {
+                            let elem = (
+                                <Box mb={1} display={'flex'}>
+                                    <Box flexGrow={1} />
+                                    <Card sx={{ p: 1 }}>
+                                        <Typography>{x.text}</Typography>
+                                    </Card>
+                                </Box>
+                            )
+                            /* if the sender is the user, then move the card to the right side */
+                            if (x.sender !== auth.userId) {
+                                elem = (
+                                    <Box mb={1} display={'flex'}>
+                                        <Card sx={{ p: 1 }}>
+                                            <Typography>{x.text}</Typography>
+                                        </Card>
+                                        <Box flexGrow={1} />
+                                    </Box>
+                                )
+                            }
+                            return elem;
+                        })}
+                    </Box>
                 </Box>
             </Box>
-        </Stack>
+            <MessageBox callback={sendMessage} userId={selectedUserId} />
+        </Box>
     )
 }
 

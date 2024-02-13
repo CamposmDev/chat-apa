@@ -8,8 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 export default class JWTAuth {
     async verifyJWT(req, res, next) {
         try {
-            let token = req.cookies.token;
-            console.log(req.cookies)
+            let token = req.cookies?.token;
             if (!token) {
                 return res.status(401).json({ message: "Unauthorized" })
             } else {

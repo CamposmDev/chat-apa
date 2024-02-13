@@ -1,4 +1,5 @@
 import db from "../../database/index.js";
+import MessageModel from "../../database/models/MessageModel.js";
 import JWTAuth from "../middleware/JWTAuth.js";
 
 
@@ -7,9 +8,10 @@ export default class MessageController {
         const { userId } = req.params;
         const token = req.cookies?.token;
         const auth = new JWTAuth()
-        const data = auth.parseToken(token);
-        const senderId = data.userId;
-        const messages = db.messages.get(senderId, userId);
-        return res.status(200).json(messages)
+        const senderId = await auth.parseToken(token);
+        // console.log(senderId);
+        // console.log(userId);
+        const messages = await db.messages.get(senderId, userId);
+        return res.status(200).json({"messages": messages})
     }
 }

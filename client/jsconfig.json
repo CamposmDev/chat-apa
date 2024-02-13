@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
-        "baseUrl": "./",
-        "paths": {
-            "*": ["client/"]
-        }
-    }
+        "jsx": "react-jsx",
+        "checkJs": true  
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules"]
 }

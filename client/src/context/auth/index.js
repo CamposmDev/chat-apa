@@ -1,120 +1,18 @@
-import { UserApi } from "../../api/axios";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
+import AuthStore from "./AuthStore";
 
-const AuthActionType = {
-    LOGIN: 'LOGIN',
-    REGISTER: "REGISTER",
-    LOGOUT: "LOGOUT"
-}
+const AuthContext = createContext(new AuthStore())
 
-const AuthContext = createContext({})
-
-const AuthContextProvider = (props) => {
+function AuthContextProvider(props) {
     const [auth, setAuth] = useState({
         userId: null,
-        loggedIn: false
+        isLoggedIn: false
     })
 
-    useEffect(() => {
-        console.log(auth)
-    }, [auth])
-
-    const authReducer = (action) => {
-        const { type, payload } = action
-        switch (type) {
-            case AuthActionType.LOGIN: {
-                return setAuth({
-                    userId: payload.userId,
-                    loggedIn: true
-                })
-            }
-            case AuthActionType.REGISTER: {
-                return setAuth({
-                    userId: payload.userId,
-                    loggedIn: true
-                });
-            }
-            case AuthActionType.LOGOUT: {
-                return setAuth({
-                    userId: null,
-                    loggedIn: false
-                });
-            }
-            default: {
-                return auth;
-            }
-        }
-    }
-    
-    auth.loginUser = async function(payload) {
-        try {
-            const res = await UserApi.loginUser(payload)
-            if (res.status === 200) {
-                authReducer({
-                    type: AuthActionType.LOGIN,
-                    payload: {
-                        userId: res.data.userId
-                    }
-                })
-            }
-        } catch (err) {
-            console.log(err)
-            // if (err.response.status === 400) {
-                // console.log(err.response.message)
-            // }
-        }
-        
-    }
-
-    auth.registerUser = async function(payload) {
-        try {
-            const res = await UserApi.registerUser(payload)
-            if (res.status === 201) {
-                authReducer({
-                    type: AuthActionType.REGISTER,
-                    payload: { 
-                        userId: res.data.userId
-                    }
-                })
-            }
-        } catch (err) {
-            console.log(err)
-        }
-    }
-
-    auth.logoutUser = async function() {
-        const res = await UserApi.logoutUser()
-        if (res.status === 200) {
-            authReducer({
-                type: AuthActionType.LOGOUT
-            })
-        }
-    }
-
-    auth.getUsernameById = async function(userId) {
-        try {
-            const res = await UserApi.getUsernameById(userId);
-            if (res.status === 200) {
-                return res.data.username;
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    auth.getUsers = async function() {
-        try {
-            const res = await UserApi.getUsers();
-            if (res.status === 200) {
-                return res.data.users;
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    }
+    const store = new AuthStore(auth, setAuth);
 
     return (
-        <AuthContext.Provider value={auth}>
+        <AuthContext.Provider value={store}>
             {props.children}
         </AuthContext.Provider>
     )

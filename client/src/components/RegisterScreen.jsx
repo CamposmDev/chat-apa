@@ -34,20 +34,20 @@ const RegisterScreen = () => {
     const nav = useNavigate()
 
     useEffect(() => {
-        if (auth.loggedIn) {
+        if (auth.isLoggedIn) {
             nav('/')
         }
         // eslint-disable-next-line
     }, [auth])
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        const firstName = data.get('firstName');
-        const lastName = data.get('lastName');
-        const username = data.get('username');
-        const email = data.get('email')
-        const password = data.get('password')
+    const handleSubmit = (ev) => {
+        ev.preventDefault();
+        const data = new FormData(ev.currentTarget);
+        const firstName = data.get('firstName').toString()
+        const lastName = data.get('lastName').toString()
+        const username = data.get('username').toString()
+        const email = data.get('email').toString()
+        const password = data.get('password').toString()
         const user = {
             firstName: firstName,
             lastName: lastName,
@@ -55,7 +55,7 @@ const RegisterScreen = () => {
             email: email,
             password: password
         }
-        auth.registerUser(user)
+        auth.register(user)
     };
 
     return (

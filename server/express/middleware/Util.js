@@ -1,11 +1,12 @@
 import { WebSocket, WebSocketServer } from "ws";
+import db from "../../database/index.js"
 
 /**
  * Parses token value from cookies
  * @param {string} cookies 
  * @returns string if token existed, otherwise null
  */
-function parseToken(cookies) {
+function parseCookies(cookies) {
     if (!cookies) return null;
     const tokenCookie = cookies.split(';').find(s => s.trim().startsWith('token='))
     if (!tokenCookie) return null;
@@ -18,15 +19,13 @@ function parseToken(cookies) {
  * @param {WebSocketServer} wss 
  */
 function refreshOnlineClients(wss) {
-    let onlineIds = [...wss.clients].map(c => c.userId);
-    const set = new Set();
-    onlineIds.forEach(x => set.add(x));
-    onlineIds = [];
-    set.forEach(x => {
-        onlineIds.push(x);
-    });
+    const ids = {};
+    [...wss.clients].forEach(c => ids[c.userId] = c.userId);
+    const payload = {
+        "online": ids
+    };
     [...wss.clients].forEach(client => {
-        client.send(JSON.stringify(onlineIds))
+        client.send(JSON.stringify(payload))
     })
 }
 
@@ -55,46 +54,42 @@ function initConnectionTimer(conn, wss) {
 /**
  * 
  * @param {WebSocket} conn 
+ * @param {WebSocketServer} wss
  */
-function initMessageHandler(conn) {
-    conn.on('message', async(message) => {
-        const messageData  = JSON.parse(message.toString())
-        const {recipient, text, file} = messageData ;
+function initMessageHandler(conn, wss) {
+    conn.on('message', async (message) => {
+        const messageData = JSON.parse(message.toString())
+        const { recipient, text, file } = messageData;
         let filename = null;
         if (file) {
             console.log('size', file.data.length);
             const parts = file.name.split('.');
             const ext = parts[parts.length - 1];
-            filename = Date.now() + '.'+ext;
+            filename = Date.now() + '.' + ext;
             const path = __dirname + '/uploads/' + filename;
             const bufferData = new Buffer(file.data.split(',')[1], 'base64');
             fs.writeFile(path, bufferData, () => {
-              console.log('file saved:'+path);
+                console.log('file saved:' + path);
             });
-          }
-          if (recipient && (text || file)) {
-            const messageDoc = await Message.create({
-              sender:connection.userId,
-              recipient,
-              text,
-              file: file ? filename : null,
-            });
-            console.log('created message');
+        }
+        if (recipient && (text || file)) {
+            const messageDoc = db.messages.create(conn.userId, recipient, text, file ? filename : null);
+            // console.log('created message');
             [...wss.clients]
-              .filter(c => c.userId === recipient)
-              .forEach(c => c.send(JSON.stringify({
-                text,
-                sender:connection.userId,
-                recipient,
-                file: file ? filename : null,
-                _id:messageDoc._id,
-              })));
-          }
+                .filter(c => c.userId === recipient)
+                .forEach(c => c.send(JSON.stringify({
+                    text,
+                    sender: conn.userId,
+                    recipient,
+                    file: file ? filename : null,
+                    _id: messageDoc._id,
+                })));
+        }
     })
 }
 
 export {
-    parseToken,
+    parseCookies,
     refreshOnlineClients,
     initConnectionTimer,
     initMessageHandler
