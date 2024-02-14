@@ -73,17 +73,19 @@ function initMessageHandler(conn, wss) {
             });
         }
         if (recipient && (text || file)) {
-            const messageDoc = db.messages.create(conn.userId, recipient, text, file ? filename : null);
+            const doc = await db.messages.create(conn.userId, recipient, text, file ? filename : null);
             // console.log('created message');
-            [...wss.clients]
-                .filter(c => c.userId === recipient)
-                .forEach(c => c.send(JSON.stringify({
-                    text,
+            const payload = {
+                message: {
+                    _id: doc._id,
                     sender: conn.userId,
                     recipient,
+                    text,
                     file: file ? filename : null,
-                    _id: messageDoc._id,
-                })));
+                    createdAt: doc.createdAt
+                }
+            };
+            [...wss.clients].filter(c => c.userId === recipient).forEach(c => c.send(JSON.stringify(payload)));
         }
     })
 }

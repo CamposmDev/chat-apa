@@ -4,7 +4,7 @@ export default class MongooseMessageDBM {
     async get(senderId, receipientId) {
         const message = await MessageModel.find({
             sender: {$in: [senderId, receipientId]},
-            recipient: {$in: [senderId, receipientId]}
+            recipient: {$in: [senderId, receipientId]},
         }).sort({createdAt: 1})
         return message;
     }

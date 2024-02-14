@@ -7,7 +7,9 @@ import CredentialBox from "./CredentialBox";
  * @returns 
  */
 const ContactCard = ({ userId, callback, isSelected, online }) => {
-  const handleClick = () => callback(userId);
+  const handleClick = () => {
+    callback(userId)
+  }
   return (
     <Card sx={{ mb: 1 }}>
       <ListItemButton sx={{ pl: 1 }}

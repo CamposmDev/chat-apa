@@ -5,7 +5,7 @@
  */
 function stringAvatar(name) {
     function stringToColor(string) {
-        if (string.length <= 0) return 0;
+        if (!string) return 0;
         let hash = 0;
         let i;
 

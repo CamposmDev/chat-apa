@@ -1,4 +1,5 @@
-import { Box, Button, TextField } from "@mui/material";
+import { AttachFile, Send } from "@mui/icons-material";
+import { Box, Button, TextField, Tooltip } from "@mui/material";
 import { useState } from "react";
 
 const MessageBox = ({ callback, userId }) => {
@@ -13,10 +14,11 @@ const MessageBox = ({ callback, userId }) => {
     }
 
     return (
-        <Box component={'form'} onSubmit={sendMessage} sx={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+        <Box component={'form'} onSubmit={sendMessage}>
             <Box display={'flex'} sx={{ padding: 2 }}>
                 <TextField label={'Message'}
                     fullWidth
+                    name="message"
                     size="small"
                     disabled={!Boolean(userId)}
                     onChange={(ev) => {
@@ -25,7 +27,12 @@ const MessageBox = ({ callback, userId }) => {
                     value={message}
                     autoComplete={"off"}
                 />
-                <Button type="submit" variant="contained" disabled={!userId}>Send</Button>
+                <Tooltip title='Attach File'>
+                    <Button disabled variant="contained" component="label"><AttachFile /><input type='file' hidden /></Button>
+                </Tooltip>
+                <Tooltip title='Send Message'>
+                    <Button type="submit" variant="contained" disabled={!userId}><Send /></Button>
+                </Tooltip>
             </Box>
         </Box>
     )

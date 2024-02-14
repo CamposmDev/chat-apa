@@ -2,7 +2,7 @@ import { Box, Container } from "@mui/material";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/auth";
-import Chat from "./Chat";
+import Workspace from "./Workspace";
 import Logo from "./appbar/Logo";
 
 const MainScreen = () => {
@@ -22,7 +22,7 @@ const MainScreen = () => {
         return (
             <Box>
                 <Logo />
-                <Chat />
+                <Workspace />
             </Box>
         )
     }

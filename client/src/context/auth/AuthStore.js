@@ -1,15 +1,33 @@
-import { MessageApi, UserApi } from "../../api/axios";
+ import { MessageApi, UserApi } from "../../api/axios";
 import AuthActionType from "./AuthAction";
+
+/**
+ * @typedef {Object} AuthType
+ * @property {string} userId
+ * @property {boolean} isLoggedIn
+ */
+
+//  * @property {Array<Object>} onlineUsers
+//  * @property {Array<Object>} offlineUsers
+//  * @property {string | null} selectedUserId
+//  * @property {Array<Object>} messages
+
+/**
+ *  @typedef {(auth: AuthType) => void} AuthFunction
+ */
 
 export default class AuthStore {
     /**
-     * 
-     * @param {{userId: string, isLoggedIn: boolean}} auth
-     * @param {(auth: {userId: string, isLoggedIn: boolean}) => void} setAuth 
+     * @param {AuthType} auth
+     * @param {AuthFunction} setAuth 
      */
-    constructor(auth = { userId: null, isLoggedIn: false }, setAuth = ({userId: string, isLoggedIn: boolean }) => { }) {
+    constructor(auth={userId: '', isLoggedIn: false}, setAuth=() => {}) {
+        /** @type {AuthType}*/
         this._auth = auth;
+        /** @type {AuthFunction} */
         this._setAuth = setAuth;
+        /** @type {WebSocket | null} */
+        // this._ws = null;
     }
 
     get userId() {
@@ -21,26 +39,28 @@ export default class AuthStore {
     }
 
     /**
-     * 
-     * @param {{type: AuthActionType, payload?: {userId?: string, isLoggedIn?: boolean}}} action 
+     * @param {{type: AuthActionType, payload?: {userId?: string, isLoggedIn?: boolean, onlineUsers?: Array<String>, offlineUsers?: Array<String>, selectedUserId?: string, messages?: Array<Object>}}} action 
      */
     authReducer(action) {
         const { type, payload } = action;
         switch (type) {
             case AuthActionType.Login: {
                 return this._setAuth({
+                    ...this._auth,
                     userId: payload.userId,
-                    isLoggedIn: true
+                    isLoggedIn: true,
                 })
             }
             case AuthActionType.Register: {
                 return this._setAuth({
+                    ...this._auth,
                     userId: payload.userId,
                     isLoggedIn: true
                 });
             }
             case AuthActionType.Logout: {
                 return this._setAuth({
+                    ...this._auth,
                     userId: null,
                     isLoggedIn: false
                 });
@@ -69,7 +89,7 @@ export default class AuthStore {
         } catch (err) {
             console.log(err)
             // if (err.response.status === 400) {
-                // console.log(err.response.message)
+            // console.log(err.response.message)
             // }
         }
     }
@@ -80,7 +100,7 @@ export default class AuthStore {
             if (res.status === 201) {
                 this.authReducer({
                     type: AuthActionType.Register,
-                    payload: { 
+                    payload: {
                         userId: res.data.userId
                     }
                 })
@@ -116,10 +136,10 @@ export default class AuthStore {
     }
 
     /**
-     * Fetches all users that exist
+     * Fetches all users that currently exist
      * @returns {Promise<Array<Object> | null>}
      */
-    async getUsers() {
+    async getAllUsers() {
         try {
             const res = await UserApi.getUsers();
             if (res.status === 200) {
@@ -131,6 +151,11 @@ export default class AuthStore {
         return null;
     }
 
+    /**
+     * Fetches all messages from associated with given user id
+     * @param {string} userId 
+     * @returns {Promise<Array<Object> | null>}
+     */
     async getMessagesFrom(userId) {
         try {
             const res = await MessageApi.getMessagesFrom(userId);

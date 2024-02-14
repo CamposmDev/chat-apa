@@ -34,7 +34,7 @@ const AccountButton = ({ username }) => {
                 aria-controls={open ? 'account-menu' : undefined}
                 aria-haspopup="true"
                 aria-expanded={open ? 'true' : undefined}
-                children={<Avatar {...stringAvatar(username)} />}
+                children={<Avatar sx={stringAvatar(username)} />}
             />
             <Popover
                 anchorEl={anchorEl}
